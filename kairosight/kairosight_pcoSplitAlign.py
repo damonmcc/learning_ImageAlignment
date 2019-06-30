@@ -53,6 +53,10 @@ if __name__ == '__main__':
     # Define termination criteria
     criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, number_of_iterations, termination_eps)
 
+    # # Run the ECC algorithm. The results are stored in warp_matrix.
+    # start = time.time()
+    # (cc, warp_matrix) = cv2.findTransformECC(im_color[:, :, 0], im_color[:, :, 1],
+    #                                          warp_matrix, warp_mode, criteria, None, 5)
     # Warp the right channel to the left channel
     start = time.time()
     (cc, warp_matrix) = cv2.findTransformECC(get_gradient(im_color[:, :, 0]), get_gradient(im_color[:, :, 1]),
