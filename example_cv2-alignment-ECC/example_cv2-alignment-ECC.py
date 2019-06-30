@@ -10,10 +10,9 @@ import time
 
 if __name__ == '__main__':
 
-    start = time.time()
     # Read the images to be aligned
-    im1 = cv2.imread("images/image1.jpg")
-    im2 = cv2.imread("images/image2.jpg")
+    im1 = cv2.imread("image1.jpg")
+    im2 = cv2.imread("image2.jpg")
 
     # Convert images to grayscale
     im1_gray = cv2.cvtColor(im1, cv2.COLOR_BGR2GRAY)
@@ -23,8 +22,8 @@ if __name__ == '__main__':
     im1_size = im1.shape
 
     # Define the motion model
-    # warp_mode = cv2.MOTION_TRANSLATION
-    warp_mode = cv2.MOTION_EUCLIDEAN
+    warp_mode = cv2.MOTION_TRANSLATION
+    # warp_mode = cv2.MOTION_EUCLIDEAN
 
     # Define 2x3 or 3x3 matrices and initialize the matrix to identity
     if warp_mode == cv2.MOTION_HOMOGRAPHY:
@@ -43,6 +42,7 @@ if __name__ == '__main__':
     criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, number_of_iterations, termination_eps)
 
     # Run the ECC algorithm. The results are stored in warp_matrix.
+    start = time.time()
     (cc, warp_matrix) = cv2.findTransformECC(im1_gray, im2_gray, warp_matrix, warp_mode, criteria, None, 5)
 
     if warp_mode == cv2.MOTION_HOMOGRAPHY:
@@ -55,7 +55,7 @@ if __name__ == '__main__':
                                      flags=cv2.INTER_LINEAR + cv2.WARP_INVERSE_MAP)
 
     end = time.time()
-    print(end - start)
+    print('Alignment time (s): ', end - start)
     # Show final results
     cv2.imshow("Image 1", im1)
     cv2.imshow("Image 2", im2)

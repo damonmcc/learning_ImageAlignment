@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import cv2
 import numpy as np
+import time
 
 
 def get_gradient(image):
@@ -15,9 +16,9 @@ def get_gradient(image):
 if __name__ == '__main__':
 
     # Read 16-bit color image.
-    # This is an image in which the two channels are
-    # concatenated horizontally.
-    # The first frame of a .pcoraw video of a adult rat heart.
+    # This is an image in which the two channels are concatenated horizontally.
+    # The first frame of a .pcoraw video of an adult rat heart,
+    # RH237/Vm emission on the left and Rhod2/Ca emission on the right.
     im = cv2.imread("images/09-250_0001", cv2.IMREAD_GRAYSCALE)
 
     # Find the width and height of the color image
@@ -33,7 +34,7 @@ if __name__ == '__main__':
         im_color[:, :, i] = im[i * height:(i + 1) * height, :]
 
     # Allocate space for aligned image
-    im_aligned = np.zeros((height, width, 3), dtype=np.uint16)
+    im_aligned = np.zeros((height, width, 2), dtype=np.uint16)
 
     # The right channel will be aligned to the left channel.
     # So copy the left channel
@@ -53,7 +54,7 @@ if __name__ == '__main__':
     criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, number_of_iterations, termination_eps)
 
     # Warp the right channel to the left channel
-    print('Hi')
+    start = time.time()
     (cc, warp_matrix) = cv2.findTransformECC(get_gradient(im_color[:, :, 0]), get_gradient(im_color[:, :, 1]),
                                              warp_matrix, warp_mode, criteria, None, 5)
     # Use Affine warp when the transformation is not a Homography
@@ -62,7 +63,8 @@ if __name__ == '__main__':
     print(warp_matrix)
 
     # Show final output
+    end = time.time()
+    print('Alignment time (s): ', end - start)
     cv2.imshow("Color Image", im_color)
     cv2.imshow("Aligned Image", im_aligned)
     cv2.waitKey(0)
-
