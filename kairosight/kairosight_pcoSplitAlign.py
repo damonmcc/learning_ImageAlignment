@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import cv2
 import numpy as np
+from tifffile import imsave
 import time
 
 
@@ -19,11 +20,12 @@ if __name__ == '__main__':
     # This is an image in which the two channels are concatenated horizontally.
     # The first frame of a .pcoraw video of an adult rat heart,
     # RH237/Vm emission on the left and Rhod2/Ca emission on the right.
-    im = cv2.imread("images/09-250_0001", cv2.IMREAD_GRAYSCALE)
+    im_filename = '11-150_0001.tif'
+    im = cv2.imread(im_filename, cv2.IMREAD_GRAYSCALE)
 
     # Find the width and height of the color image
     im_size = im.shape
-    print(im_size)
+    print('Original image size ' + str(im_size))
     height = im_size[0]
     width = int(im_size[1] / 2)
 
@@ -31,7 +33,7 @@ if __name__ == '__main__':
     # and merge the two channels into one color image
     im_color = np.zeros((height, width, 2), dtype=np.uint16)
     for i in range(0, 2):
-        im_color[:, :, i] = im[i * height:(i + 1) * height, :]
+        im_color[:, :, i] = im[:, i * width:(i + 1) * width]
 
     # Allocate space for aligned image
     im_aligned = np.zeros((height, width, 2), dtype=np.uint16)
@@ -53,22 +55,26 @@ if __name__ == '__main__':
     # Define termination criteria
     criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, number_of_iterations, termination_eps)
 
-    # # Run the ECC algorithm. The results are stored in warp_matrix.
-    # start = time.time()
+    # Enhanced Correlation Coefficient (ECC)
+    # Run the ECC algorithm. The results are stored in warp_matrix.
+    start = time.time()
     # (cc, warp_matrix) = cv2.findTransformECC(im_color[:, :, 0], im_color[:, :, 1],
     #                                          warp_matrix, warp_mode, criteria, None, 5)
     # Warp the right channel to the left channel
-    start = time.time()
     (cc, warp_matrix) = cv2.findTransformECC(get_gradient(im_color[:, :, 0]), get_gradient(im_color[:, :, 1]),
                                              warp_matrix, warp_mode, criteria, None, 5)
     # Use Affine warp when the transformation is not a Homography
     im_aligned[:, :, 1] = cv2.warpAffine(im_color[:, :, 1], warp_matrix, (width, height),
                                          flags=cv2.INTER_LINEAR + cv2.WARP_INVERSE_MAP)
+    print('warp matrix:')
     print(warp_matrix)
 
     # Show final output
     end = time.time()
     print('Alignment time (s): ', end - start)
-    cv2.imshow("Color Image", im_color)
-    cv2.imshow("Aligned Image", im_aligned)
+    description = 'cv2 Alignment, ECC gradient' + im_filename + ': '
+    imsave('im_aligned[0].tif', im_aligned[:, :, 0], description=description + "Left/RH237/Vm")
+    imsave('im_aligned[1].tif', im_aligned[:, :, 1], description=description + "Right/Rhod2/Ca")
+    # cv2.imshow("Color Image", im)
+    # cv2.imshow("Aligned Image", im_aligned[:, :, 0])
     cv2.waitKey(0)

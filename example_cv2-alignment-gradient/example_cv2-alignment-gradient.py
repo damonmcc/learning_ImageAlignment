@@ -24,13 +24,13 @@ if __name__ == '__main__':
     # This is an image in which the three channels are
     # concatenated vertically.
     start = time.time()
-    im = cv2.imread("images/emir.jpg", cv2.IMREAD_GRAYSCALE)
+    im = cv2.imread("emir.jpg", cv2.IMREAD_GRAYSCALE)
 
     # Find the width and height of the color image
-    sz = im.shape
-    print(sz)
-    height = int(sz[0] / 3)
-    width = sz[1]
+    im_size = im.shape
+    print('Original image size ' + str(im_size))
+    height = int(im_size[0] / 3)
+    width = im_size[1]
 
     # Extract the three channels from the gray scale image
     # and merge the three channels into one color image
@@ -57,10 +57,8 @@ if __name__ == '__main__':
     # Set the stopping criteria for the algorithm.
     criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 5000, 1e-10)
 
-    print('Hi')
     # Warp the blue and green channels to the red channel
     for i in range(0, 2):
-        print('Hi, ', i)
         (cc, warp_matrix) = cv2.findTransformECC(get_gradient(im_color[:, :, 2]), get_gradient(im_color[:, :, i]),
                                                  warp_matrix, warp_mode, criteria, None, 5)
         if warp_mode == cv2.MOTION_HOMOGRAPHY:
@@ -71,6 +69,7 @@ if __name__ == '__main__':
             # Use Affine warp when the transformation is not a Homography
             im_aligned[:, :, i] = cv2.warpAffine(im_color[:, :, i], warp_matrix, (width, height),
                                                  flags=cv2.INTER_LINEAR + cv2.WARP_INVERSE_MAP)
+        print('warp matrix:')
         print(warp_matrix)
 
     # Show final output

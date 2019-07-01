@@ -41,6 +41,7 @@ if __name__ == '__main__':
     # Define termination criteria
     criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, number_of_iterations, termination_eps)
 
+    # Enhanced Correlation Coefficient (ECC)
     # Run the ECC algorithm. The results are stored in warp_matrix.
     start = time.time()
     (cc, warp_matrix) = cv2.findTransformECC(im1_gray, im2_gray, warp_matrix, warp_mode, criteria, None, 5)
